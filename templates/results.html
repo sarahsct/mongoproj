@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block body_class %}results-page{% endblock %}
+
+{% block content %}
+<section class="page-hero compact-hero">
+  <div class="container page-hero-grid">
+    <div>
+      <div class="eyebrow">
+        <span></span>
+        Species database
+      </div>
+      <h1>Search Results</h1>
+      <p>Refine biodiversity records by keyword, park area, category, images, comments, and spatial context.</p>
+    </div>
+
+    <form class="top-search" action="{{ url_for('search') }}" method="get" role="search" aria-label="Search species">
+      <label class="sr-only" for="top-q">Search species</label>
+      <input id="top-q" name="q" type="search" placeholder="Search species, animals, birds, plants..." value="{{ query }}">
+      <input name="area" type="hidden" value="{{ area }}">
+      <input name="category" type="hidden" value="{{ selected_category }}">
+      <input name="park" type="hidden" value="{{ selected_park }}">
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+  </div>
+</section>
+
+<section class="results-shell container" aria-labelledby="results-title">
+  <aside class="filter-sidebar" aria-label="Search filters">
+    <div class="sidebar-card">
+      <div class="sidebar-heading">
+        <h2>Filters</h2>
+        <a href="{{ url_for('search') }}">Reset</a>
+      </div>
+
+      <form action="{{ url_for('search') }}" method="get">
+        <div class="field">
+          <label for="filter-q">Keyword Search</label>
+          <input id="filter-q" name="q" type="search" placeholder="Name or description" value="{{ query }}">
+        </div>
+
+        <div class="field">
+          <label for="filter-area">Park or Location</label>
+          <input id="filter-area" name="area" type="text" placeholder="Yosemite, Montana..." value="{{ area }}">
+        </div>
+
+        <div class="field">
+          <label for="filter-category">Category</label>
+          <div class="select-wrap">
+            <select id="filter-category" name="category">
+              {% for category in categories %}
+                <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>{{ category }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="filter-park">Park</label>
+          <div class="select-wrap">
+            <select id="filter-park" name="park">
+              <option value="">All Parks</option>
+              {% for park in parks %}
+                <option value="{{ park }}" {% if park == selected_park %}selected{% endif %}>{{ park }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <fieldset class="checkbox-group">
+          <legend>Record Features</legend>
+          <label>
+            <input type="checkbox" name="has_image" {% if has_image %}checked{% endif %}>
+            Has Image
+          </label>
+          <label>
+            <input type="checkbox" name="has_comments" {% if has_comments %}checked{% endif %}>
+            Has Comments
+          </label>
+        </fieldset>
+
+        <button class="btn btn-primary btn-full" type="submit">Apply filters</button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="results-content">
+    <div class="results-toolbar">
+      <div>
+        <p class="section-kicker">Matching records</p>
+        <h2 id="results-title">{{ total_results }} species found</h2>
+      </div>
+      <div class="sort-control">
+        <label for="sort">Sort by</label>
+        <select id="sort" aria-label="Sort results">
+          <option>Relevance</option>
+          <option>Common Name</option>
+          <option>Park Name</option>
+          <option>Category</option>
+        </select>
+      </div>
+    </div>
+
+    {% if species_results %}
+      <div class="results-list">
+        {% for species in species_results %}
+          <article class="result-card reveal">
+            <a class="result-image" href="{{ species_detail_url(species.slug) }}" aria-label="View details for {{ species.common_name }}">
+              <img src="{{ species.image_url }}" alt="{{ species.common_name }} thumbnail" loading="lazy">
+            </a>
+            <div class="result-body">
+              <div class="result-meta">
+                <span>{{ species.category }}</span>
+                <span>{{ species.park_name }}</span>
+              </div>
+              <h3>{{ species.common_name }}</h3>
+              <em>{{ species.scientific_name }}</em>
+              <p>{{ species.short_description }}</p>
+              <div class="result-footer">
+                <span class="pill">{{ species.conservation_status }}</span>
+                <a class="btn btn-secondary" href="{{ species_detail_url(species.slug) }}">View Details</a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+      <nav class="pagination" aria-label="Search results pagination">
+        <a class="pagination-link is-disabled" href="#" aria-disabled="true">Previous</a>
+        <a class="pagination-link is-active" href="#" aria-current="page">1</a>
+        <a class="pagination-link" href="#">2</a>
+        <a class="pagination-link" href="#">3</a>
+        <span>...</span>
+        <a class="pagination-link" href="#">Next</a>
+      </nav>
+    {% else %}
+      <div class="empty-state">
+        <span aria-hidden="true">No results</span>
+        <h3>No species matched your filters</h3>
+        <p>Try broadening your search terms, selecting all categories, or removing record feature filters.</p>
+        <a class="btn btn-primary" href="{{ url_for('search') }}">View all species</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
