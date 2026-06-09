@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block body_class %}home-page{% endblock %}
+
+{% block content %}
+<section class="hero hero-home">
+  <div class="hero-media" aria-hidden="true"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content container">
+    <div class="eyebrow">
+      <span></span>
+      AI-powered biodiversity platform
+    </div>
+    <h1>EcoExplorer</h1>
+    <p class="hero-subtitle">Discover biodiversity across U.S. National Parks.</p>
+    <p class="hero-copy">
+      Search species records, park habitats, GridFS image collections, community observations, and AI-generated ecological summaries from one polished dashboard.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#search">Start exploring</a>
+      <a class="btn btn-ghost" href="{{ url_for('search') }}">Browse species</a>
+    </div>
+  </div>
+</section>
+
+<section class="search-panel-section container" id="search" aria-labelledby="search-title">
+  <div class="section-heading">
+    <p class="section-kicker">Find species faster</p>
+    <h2 id="search-title">Search by name, habitat, park, or category</h2>
+    <p>Designed for MongoDB text search, geospatial queries, and species metadata filtering.</p>
+  </div>
+
+  <form class="search-panel" action="{{ url_for('search') }}" method="get">
+    <div class="field field-wide">
+      <label for="q">Keyword Search</label>
+      <div class="input-icon">
+        <span aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M10.8 4a6.8 6.8 0 0 1 5.4 10.9l3.5 3.5-1.4 1.4-3.5-3.5A6.8 6.8 0 1 1 10.8 4Zm0 2a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 0 0 0-9.6Z"/></svg>
+        </span>
+        <input id="q" name="q" type="search" placeholder="Search species, animals, birds, plants..." autocomplete="off">
+      </div>
+      <small>Common name, scientific name, and species description</small>
+    </div>
+
+    <div class="field">
+      <label for="area">Search by Area</label>
+      <div class="input-icon">
+        <span aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2Z"/></svg>
+        </span>
+        <input id="area" name="area" type="text" placeholder="Park name or location">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="category">Species Category</label>
+      <div class="select-wrap">
+        <select id="category" name="category">
+          {% for category in categories %}
+            <option value="{{ category }}">{{ category }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary search-submit" type="submit">
+      <span>Search biodiversity</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m13.2 5.3 5.7 5.7-5.7 5.7-1.4-1.4 3.3-3.3H5v-2h10.1l-3.3-3.3 1.4-1.4Z"/></svg>
+    </button>
+  </form>
+</section>
+
+<section class="stats-section" aria-labelledby="stats-title">
+  <div class="container">
+    <div class="section-heading section-heading-light">
+      <p class="section-kicker">MongoDB biodiversity index</p>
+      <h2 id="stats-title">Built for large-scale ecological discovery</h2>
+    </div>
+
+    <div class="stats-grid">
+      {% for stat in stats %}
+        <article class="stat-card reveal">
+          <div class="stat-icon icon-{{ stat.icon }}" aria-hidden="true"></div>
+          <strong>{{ stat.value }}</strong>
+          <span>{{ stat.label }}</span>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="feature-section container" aria-labelledby="feature-title">
+  <div class="section-heading">
+    <p class="section-kicker">Platform capabilities</p>
+    <h2 id="feature-title">Explore parks through connected species intelligence</h2>
+  </div>
+
+  <div class="feature-grid">
+    <article class="feature-card reveal">
+      <span class="feature-icon" aria-hidden="true">01</span>
+      <h3>Text and taxonomy search</h3>
+      <p>Search common names, scientific names, descriptions, and park records with a clean interface designed for MongoDB indexes.</p>
+    </article>
+    <article class="feature-card reveal">
+      <span class="feature-icon" aria-hidden="true">02</span>
+      <h3>Geospatial exploration</h3>
+      <p>Area search fields support park-level and location-based workflows for map-driven biodiversity discovery.</p>
+    </article>
+    <article class="feature-card reveal">
+      <span class="feature-icon" aria-hidden="true">03</span>
+      <h3>AI species summaries</h3>
+      <p>Premium summary cards present generated ecological context in a polished, trustworthy visual treatment.</p>
+    </article>
+  </div>
+</section>
+
+<section class="spotlight-section container" aria-labelledby="spotlight-title">
+  <div class="section-heading">
+    <p class="section-kicker">Featured records</p>
+    <h2 id="spotlight-title">A preview of national park biodiversity</h2>
+  </div>
+
+  <div class="species-grid">
+    {% for species in featured_species %}
+      <article class="species-card reveal">
+        <a class="species-image" href="{{ species_detail_url(species.slug) }}" aria-label="View {{ species.common_name }}">
+          <img src="{{ species.image_url }}" alt="{{ species.common_name }} in {{ species.park_name }}" loading="lazy">
+          <span>{{ species.category }}</span>
+        </a>
+        <div class="species-card-content">
+          <p>{{ species.park_name }}</p>
+          <h3>{{ species.common_name }}</h3>
+          <em>{{ species.scientific_name }}</em>
+          <p>{{ species.short_description }}</p>
+          <a class="text-link" href="{{ species_detail_url(species.slug) }}">View details</a>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
